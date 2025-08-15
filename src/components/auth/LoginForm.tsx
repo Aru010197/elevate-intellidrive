@@ -55,8 +55,14 @@ export function LoginForm({ role }: LoginFormProps) {
           title: "Welcome back!",
           description: "You have been successfully logged in.",
         });
+        
+        // Navigate based on role
         if (role === "investor") {
-          navigate("/InvestmentDashboard");
+          navigate("/investor-dashboard");
+        } else if (role === "wealth-partner") {
+          navigate("/partner-dashboard");
+        } else if (role === "admin") {
+          navigate("/admin-dashboard");
         }
       }
     } catch (error) {

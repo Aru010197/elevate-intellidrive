@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Home, 
   Users, 
@@ -19,13 +22,17 @@ import {
   Plus,
   Eye,
   Share2,
-  Download
+  Download,
+  LogOut
 } from "lucide-react";
 
 const WealthPartnerDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("All");
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
@@ -86,11 +93,47 @@ const WealthPartnerDashboard = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const filteredOpportunities = opportunities.filter(opp => {
-    const matchesSearch = opp.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "All" || opp.type === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
+      setUser(session.user);
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/auth');
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+  };
+
+  if (!user) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>;
+  }
 
   const renderSidebar = () => (
     <aside className="w-64 bg-card border-r border-border flex flex-col h-screen fixed left-0 top-0">
@@ -126,14 +169,15 @@ const WealthPartnerDashboard = () => {
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium">SP</span>
+            <span className="text-sm font-medium">{user?.email?.[0]?.toUpperCase()}</span>
           </div>
           <div>
-            <div className="text-sm font-medium text-foreground">Sarah Parker</div>
+            <div className="text-sm font-medium text-foreground">{user?.email}</div>
             <div className="text-xs text-muted-foreground">Wealth Partner</div>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="w-full">
+        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+          <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
       </div>
@@ -143,7 +187,7 @@ const WealthPartnerDashboard = () => {
   const renderDashboard = () => (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Welcome back, Sarah.</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Welcome back, {user?.email}</h1>
         <p className="text-muted-foreground">Here's an overview of your clients and their investments.</p>
       </div>
 
@@ -752,6 +796,12 @@ const WealthPartnerDashboard = () => {
         return renderDashboard();
     }
   };
+
+  const filteredOpportunities = opportunities.filter(opp => {
+    const matchesSearch = opp.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === "All" || opp.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="min-h-screen bg-background">
