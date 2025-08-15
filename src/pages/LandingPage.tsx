@@ -98,7 +98,7 @@ const LandingPage = () => {
                     Secure document management
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full">
+                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
                   Access Investor Portal
                 </Button>
               </CardContent>
@@ -134,7 +134,7 @@ const LandingPage = () => {
                     Performance analytics
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full">
+                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
                   Access Partner Portal
                 </Button>
               </CardContent>
@@ -170,7 +170,7 @@ const LandingPage = () => {
                     System analytics & reports
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full">
+                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
                   Access Admin Portal
                 </Button>
               </CardContent>
