@@ -56,14 +56,9 @@ export function LoginForm({ role }: LoginFormProps) {
           description: "You have been successfully logged in.",
         });
         
-        // Navigate based on role - the ProtectedRoute will handle redirection
-        if (role === "investor") {
-          navigate("/investor-dashboard");
-        } else if (role === "wealth-partner") {
-          navigate("/partner-dashboard");
-        } else if (role === "admin") {
-          navigate("/admin-dashboard");
-        }
+        // The AuthContext will handle the redirect automatically
+        // Navigate to root and let Index component handle role-based routing
+        navigate("/");
       }
     } catch (error) {
       toast({
