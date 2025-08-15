@@ -18,7 +18,7 @@ const investorSignupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  investorCode: z.string().regex(/^INV-[A-Z0-9]{6}$/, "Investor code must be in format INV-XXXXXX"),
+  investorCode: z.string().default("invest123"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -51,7 +51,7 @@ export function InvestorSignupForm({ onSuccess }: InvestorSignupFormProps) {
           data: {
             name: data.name,
             role: "investor",
-            investor_code: data.investorCode,
+            investor_code: "invest123",
           },
         },
       });
@@ -113,15 +113,12 @@ export function InvestorSignupForm({ onSuccess }: InvestorSignupFormProps) {
         <Label htmlFor="investorCode">Investor Code</Label>
         <Input
           id="investorCode"
-          placeholder="INV-XXXXXX"
-          {...register("investorCode")}
-          className={errors.investorCode ? "border-destructive focus-visible:ring-destructive" : ""}
+          value="invest123"
+          disabled
+          className="bg-gray-100 cursor-not-allowed"
         />
-        {errors.investorCode && (
-          <p className="text-sm text-destructive">{errors.investorCode.message}</p>
-        )}
         <p className="text-xs text-muted-foreground">
-          Enter the investor code provided to you
+          Investor code is set automatically
         </p>
       </div>
 

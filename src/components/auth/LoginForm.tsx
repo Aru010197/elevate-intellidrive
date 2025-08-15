@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type UserRole = "investor" | "wealth-partner" | "admin";
 
@@ -25,6 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginForm({ role }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -53,7 +55,9 @@ export function LoginForm({ role }: LoginFormProps) {
           title: "Welcome back!",
           description: "You have been successfully logged in.",
         });
-        // Redirect logic will be handled by auth state change
+        if (role === "investor") {
+          navigate("/InvestmentDashboard");
+        }
       }
     } catch (error) {
       toast({
