@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -11,13 +12,17 @@ type UserRole = "investor" | "wealth-partner" | "admin";
 export default function Auth() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("investor");
   const [isSignupMode, setIsSignupMode] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 
+            className="text-3xl font-bold text-white mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
             Elevate <span className="text-xs bg-warning text-warning-foreground px-2 py-1 rounded-full ml-2">BETA</span>
           </h1>
           <p className="text-white/80">

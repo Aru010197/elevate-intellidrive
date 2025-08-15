@@ -13,7 +13,10 @@ const LandingPage = () => {
       <header className="border-b bg-card shadow-card">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div 
+              className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/')}
+            >
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -228,7 +231,10 @@ const LandingPage = () => {
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-3 mb-4 md:mb-0">
+            <div 
+              className="flex items-center gap-3 mb-4 md:mb-0 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/')}
+            >
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-primary-foreground" />
               </div>
