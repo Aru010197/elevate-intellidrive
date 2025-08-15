@@ -51,7 +51,7 @@ export function WealthPartnerSignupForm({ onSuccess }: WealthPartnerSignupFormPr
           emailRedirectTo: redirectUrl,
           data: {
             name: data.name,
-            role: "wealth_partner",
+            role: "wealth-partner",
             company_name: data.companyName,
             contact_number: data.contactNumber,
           },

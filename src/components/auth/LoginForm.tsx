@@ -56,7 +56,7 @@ export function LoginForm({ role }: LoginFormProps) {
           description: "You have been successfully logged in.",
         });
         
-        // Navigate based on role
+        // Navigate based on role - the ProtectedRoute will handle redirection
         if (role === "investor") {
           navigate("/investor-dashboard");
         } else if (role === "wealth-partner") {

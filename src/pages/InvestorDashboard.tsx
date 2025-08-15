@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Home, 
   Target, 
@@ -28,6 +29,24 @@ const InvestorDashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+      });
+    }
+  };
 
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
@@ -77,13 +96,6 @@ const InvestorDashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-  };
 
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.name.toLowerCase().includes(searchTerm.toLowerCase());
