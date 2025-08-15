@@ -43,14 +43,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('profiles')
         .select('id, role')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
         return null;
       }
 
-      return data as UserProfile;
+      return data as UserProfile | null;
     } catch (error) {
       console.error('Error fetching profile:', error);
       return null;
