@@ -5,6 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   TrendingUp, 
@@ -24,11 +29,21 @@ import {
   FileBarChart,
   DollarSign,
   TrendingDown,
-  AlertCircle
+  AlertCircle,
+  LogOut,
+  Download,
+  Trash2,
+  UserX,
+  Mail
 } from "lucide-react";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUserFilter, setSelectedUserFilter] = useState("all");
+  const [selectedOpportunityFilter, setSelectedOpportunityFilter] = useState("all");
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const platformMetrics = [
     { title: "Total Users", value: "41", change: "+5 growth (previous 32 increased)", icon: Users, color: "text-green-600" },
@@ -79,6 +94,99 @@ const AdminDashboard = () => {
     { name: "L&T Finance ICD", type: "ICD", yield: "8.7%", tenor: "180 days", minInvestment: "₹5,00,000", status: "Draft", createdBy: "Michael Johnson" }
   ];
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to log out. Please try again.",
+        });
+      } else {
+        toast({
+          title: "Logged out",
+          description: "You have been successfully logged out.",
+        });
+        navigate("/auth");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred.",
+      });
+    }
+  };
+
+  const handleApproveRequest = (requestName: string) => {
+    toast({
+      title: "Request Approved",
+      description: `${requestName} has been approved successfully.`,
+    });
+  };
+
+  const handleRejectRequest = (requestName: string) => {
+    toast({
+      variant: "destructive",
+      title: "Request Rejected",
+      description: `${requestName} has been rejected.`,
+    });
+  };
+
+  const handleInviteUser = () => {
+    toast({
+      title: "Invite Sent",
+      description: "User invitation has been sent successfully.",
+    });
+  };
+
+  const handleDeleteUser = (userName: string) => {
+    toast({
+      variant: "destructive",
+      title: "User Deleted",
+      description: `${userName} has been removed from the platform.`,
+    });
+  };
+
+  const handleCreateOpportunity = () => {
+    toast({
+      title: "Opportunity Created",
+      description: "New investment opportunity has been created.",
+    });
+  };
+
+  const handleGenerateInsight = () => {
+    toast({
+      title: "Generating Insight",
+      description: "AI is analyzing the data. Results will be available shortly.",
+    });
+  };
+
+  const handleExportData = () => {
+    toast({
+      title: "Exporting Data",
+      description: "Data export has started. You'll receive an email when ready.",
+    });
+  };
+
+  // Filter functions
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = selectedUserFilter === "all" || 
+                         user.role.toLowerCase().replace(" ", "-") === selectedUserFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const filteredOpportunities = investments.filter(investment => {
+    const matchesSearch = investment.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = selectedOpportunityFilter === "all" || 
+                         investment.status.toLowerCase() === selectedOpportunityFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+
   const renderDashboard = () => (
     <div className="space-y-6">
       {/* Metrics Cards */}
@@ -110,10 +218,10 @@ const AdminDashboard = () => {
           <div className="space-y-4">
             <Input placeholder="Ask a question or request an analysis..." />
             <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm">Generate weekly activity report</Button>
-              <Button variant="outline" size="sm">List users with over ₹1M invested</Button>
-              <Button variant="outline" size="sm">Show all pending investment opportunities</Button>
-              <Button className="ml-auto">Generate Insight</Button>
+              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>Generate weekly activity report</Button>
+              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>List users with over ₹1M invested</Button>
+              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>Show all pending investment opportunities</Button>
+              <Button className="ml-auto" onClick={handleGenerateInsight}>Generate Insight</Button>
             </div>
           </div>
         </CardContent>
@@ -141,8 +249,19 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="outline">Reject</Button>
-                    <Button size="sm">Approve</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleRejectRequest(approval.name)}
+                    >
+                      Reject
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleApproveRequest(approval.name)}
+                    >
+                      Approve
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -232,24 +351,53 @@ const AdminDashboard = () => {
       <div className="flex justify-between items-center">
         <div className="relative w-96">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search users by name, email, or role..." className="pl-9" />
+          <Input 
+            placeholder="Search users by name, email, or role..." 
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <Button>
-          <UserPlus className="w-4 h-4 mr-2" />
-          Invite User
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Invite User
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Invite New User</DialogTitle>
+              <DialogDescription>
+                Send an invitation to a new user to join the platform.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input placeholder="Email address" />
+              <select className="w-full p-2 border rounded">
+                <option value="investor">Investor</option>
+                <option value="wealth-partner">Wealth Partner</option>
+                <option value="admin">Admin</option>
+              </select>
+              <Button onClick={handleInviteUser} className="w-full">
+                <Mail className="w-4 h-4 mr-2" />
+                Send Invitation
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>Platform Users</CardTitle>
-          <Tabs defaultValue="all">
+          <Tabs value={selectedUserFilter} onValueChange={setSelectedUserFilter}>
             <TabsList>
               <TabsTrigger value="all">All Users</TabsTrigger>
-              <TabsTrigger value="wealth-partners">Wealth Partners</TabsTrigger>
-              <TabsTrigger value="investors">Investors</TabsTrigger>
-              <TabsTrigger value="admins">Admins</TabsTrigger>
+              <TabsTrigger value="wealth-partner">Wealth Partners</TabsTrigger>
+              <TabsTrigger value="investor">Investors</TabsTrigger>
+              <TabsTrigger value="admin">Admins</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardHeader>
@@ -267,7 +415,7 @@ const AdminDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user, index) => (
+              {filteredUsers.map((user, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -284,7 +432,40 @@ const AdminDashboard = () => {
                   <TableCell>{user.joinedDate}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{user.details}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">Actions</Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      {user.role !== "Admin" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete User</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete {user.name}? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteUser(user.name)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -371,9 +552,14 @@ const AdminDashboard = () => {
       <div className="flex justify-between items-center">
         <div className="relative w-96">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search opportunities..." className="pl-9" />
+          <Input 
+            placeholder="Search opportunities..." 
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <Button>
+        <Button onClick={handleCreateOpportunity}>
           <Plus className="w-4 h-4 mr-2" />
           Create Opportunity
         </Button>
@@ -383,11 +569,11 @@ const AdminDashboard = () => {
       <Card>
         <CardHeader>
           <CardTitle>Investment Opportunities</CardTitle>
-          <Tabs defaultValue="all">
+          <Tabs value={selectedOpportunityFilter} onValueChange={setSelectedOpportunityFilter}>
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="drafts">Drafts</TabsTrigger>
+              <TabsTrigger value="draft">Drafts</TabsTrigger>
               <TabsTrigger value="closed">Closed</TabsTrigger>
             </TabsList>
           </Tabs>
@@ -407,7 +593,7 @@ const AdminDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {investments.map((investment, index) => (
+              {filteredOpportunities.map((investment, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">{investment.name}</TableCell>
                   <TableCell>
@@ -426,7 +612,17 @@ const AdminDashboard = () => {
                   </TableCell>
                   <TableCell>{investment.createdBy}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">Actions</Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -473,7 +669,7 @@ const AdminDashboard = () => {
               <p className="text-muted-foreground">Platform overview and management</p>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleExportData}>
                 <FileBarChart className="w-4 h-4 mr-2" />
                 Export Data
               </Button>
@@ -481,6 +677,28 @@ const AdminDashboard = () => {
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Logout Confirmation</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to logout? You'll need to sign in again to access the admin panel.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout}>
+                      Logout
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>
