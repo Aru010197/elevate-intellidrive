@@ -2,8 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Users, Shield, TrendingUp, MessageSquare, BarChart3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with Beta Badge */}
@@ -98,7 +101,7 @@ const LandingPage = () => {
                     Secure document management
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
+                <Button variant="portal" className="w-full" onClick={() => navigate('/auth')}>
                   Access Investor Portal
                 </Button>
               </CardContent>
@@ -134,7 +137,7 @@ const LandingPage = () => {
                     Performance analytics
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
+                <Button variant="portal" className="w-full" onClick={() => navigate('/auth')}>
                   Access Partner Portal
                 </Button>
               </CardContent>
@@ -170,7 +173,7 @@ const LandingPage = () => {
                     System analytics & reports
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full" onClick={() => window.location.href = '/auth'}>
+                <Button variant="portal" className="w-full" onClick={() => navigate('/auth')}>
                   Access Admin Portal
                 </Button>
               </CardContent>
