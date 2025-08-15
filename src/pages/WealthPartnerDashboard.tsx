@@ -677,14 +677,61 @@ const WealthPartnerDashboard = () => {
 
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Report Preview</CardTitle>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
             </CardHeader>
-            <CardContent className="flex items-center justify-center h-64 bg-muted/30 rounded-lg">
-              <div className="text-center">
-                <FileBarChart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Report preview will be displayed here</p>
-                <p className="text-sm text-muted-foreground">Select report type and time period</p>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-4 border-b">
+                  <div>
+                    <h3 className="text-lg font-semibold">Portfolio Performance Report</h3>
+                    <p className="text-sm text-muted-foreground">Quarterly Report - Q2 2024</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Generated on</p>
+                    <p className="text-sm font-medium">15 Aug 2024</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total AUM</p>
+                    <p className="text-xl font-bold text-green-600">₹5.2 Cr</p>
+                    <p className="text-xs text-green-600">+12.5% YoY</p>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Active Clients</p>
+                    <p className="text-xl font-bold text-blue-600">12</p>
+                    <p className="text-xs text-blue-600">+3 new</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Avg. Returns</p>
+                    <p className="text-xl font-bold text-purple-600">11.8%</p>
+                    <p className="text-xs text-purple-600">+2.3% vs benchmark</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-3">Top Performing Investments</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                      <span className="text-sm">HDFC Ltd ICD</span>
+                      <span className="text-sm font-medium text-green-600">+14.2%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                      <span className="text-sm">Tata Motors Bond</span>
+                      <span className="text-sm font-medium text-green-600">+12.8%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                      <span className="text-sm">Bajaj Housing Finance</span>
+                      <span className="text-sm font-medium text-green-600">+11.5%</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
