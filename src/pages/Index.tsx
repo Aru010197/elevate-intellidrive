@@ -9,8 +9,10 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Index component state:', { loading, user: !!user, profile });
     if (!loading && user && profile) {
       // Redirect authenticated users to their appropriate dashboard
+      console.log('Redirecting user with role:', profile.role);
       switch (profile.role) {
         case 'admin':
           navigate('/admin-dashboard');
@@ -22,6 +24,8 @@ const Index = () => {
           navigate('/investor-dashboard');
           break;
       }
+    } else if (!loading && user && !profile) {
+      console.log('User exists but no profile found - staying on landing page');
     }
   }, [user, profile, loading, navigate]);
 
