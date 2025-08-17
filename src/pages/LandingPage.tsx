@@ -176,7 +176,7 @@ const LandingPage = () => {
                     System analytics & reports
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full text-sm sm:text-base py-2 sm:py-3" onClick={() => navigate('/admin-dashboard')}>
+                <Button variant="portal" className="w-full text-sm sm:text-base py-2 sm:py-3" onClick={() => navigate('/auth?role=admin')}>
                   Access Admin Portal
                 </Button>
               </CardContent>
