@@ -34,7 +34,9 @@ import {
   Download,
   Trash2,
   UserX,
-  Mail
+  Mail,
+  Menu,
+  X
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -45,6 +47,7 @@ const AdminDashboard = () => {
   const [aiInsightQuery, setAiInsightQuery] = useState("");
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const [generatedInsight, setGeneratedInsight] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -842,26 +845,37 @@ Based on current trends, expect:
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Admin Control Panel</h1>
-              <p className="text-muted-foreground">Platform overview and management</p>
+            <div className="flex items-center gap-3">
+              {/* Mobile Menu Button */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="lg:hidden" 
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <Menu className="w-5 h-5" />
+              </Button>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">Admin Control Panel</h1>
+                <p className="text-muted-foreground hidden sm:block">Platform overview and management</p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={handleExportData}>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button variant="outline" onClick={handleExportData} size="sm" className="hidden sm:flex">
                 <FileBarChart className="w-4 h-4 mr-2" />
                 Export Data
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" size="sm" className="hidden md:flex">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                  <Button variant="outline" size="sm">
+                    <LogOut className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Logout</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -884,14 +898,91 @@ Based on current trends, expect:
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-6">
+      {/* Mobile Navigation Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col z-50">
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="font-bold text-lg text-foreground">Elevate Admin</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+            
+            <nav className="flex-1 p-4">
+              <div className="space-y-1">
+                {[
+                  { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+                  { id: "users", label: "User Management", icon: Users },
+                  { id: "opportunities", label: "Opportunities", icon: Building2 },
+                  { id: "settings", label: "Settings", icon: Settings },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        activeTab === item.id 
+                          ? "bg-primary text-primary-foreground" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+
+            <div className="p-4 border-t border-border">
+              <Button variant="outline" size="sm" className="w-full mb-2" onClick={handleExportData}>
+                <FileBarChart className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+              <Button variant="outline" size="sm" className="w-full">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 hidden lg:flex">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="settings">Platform Settings</TabsTrigger>
           </TabsList>
+
+          {/* Mobile Tab Selector */}
+          <div className="mb-6 lg:hidden">
+            <select 
+              value={activeTab} 
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full p-2 border border-border rounded-md bg-background"
+            >
+              <option value="dashboard">Dashboard</option>
+              <option value="users">User Management</option>
+              <option value="opportunities">Opportunities</option>
+              <option value="settings">Platform Settings</option>
+            </select>
+          </div>
 
           <TabsContent value="dashboard">
             {renderDashboard()}

@@ -25,7 +25,9 @@ import {
   Eye,
   Share2,
   Download,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 
 const WealthPartnerDashboard = () => {
@@ -33,6 +35,7 @@ const WealthPartnerDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("All");
   const [user, setUser] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signOut } = useAuth();
@@ -149,52 +152,116 @@ const WealthPartnerDashboard = () => {
   }
 
   const renderSidebar = () => (
-    <aside className="w-64 bg-card border-r border-border flex flex-col h-screen fixed left-0 top-0">
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-primary-foreground" />
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-card border-r border-border flex-col h-screen fixed left-0 top-0 z-30">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-lg text-foreground">Elevate</span>
           </div>
-          <span className="font-bold text-lg text-foreground">Elevate</span>
         </div>
-      </div>
-      
-      <nav className="flex-1 p-4">
-        {sidebarItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors mb-1 ${
-                activeSection === item.id 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
+        
+        <nav className="flex-1 p-4">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors mb-1 ${
+                  activeSection === item.id 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium">{user?.email?.[0]?.toUpperCase()}</span>
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <span className="text-sm font-medium">{user?.email?.[0]?.toUpperCase()}</span>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-foreground">{user?.email}</div>
+              <div className="text-xs text-muted-foreground">Wealth Partner</div>
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-medium text-foreground">{user?.email}</div>
-            <div className="text-xs text-muted-foreground">Wealth Partner</div>
-          </div>
+          <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
         </div>
-        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
-      </div>
-    </aside>
+      </aside>
+
+      {/* Mobile Navigation Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+          <aside className="fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col z-50">
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="font-bold text-lg text-foreground">Elevate</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+            
+            <nav className="flex-1 p-4">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors mb-1 ${
+                      activeSection === item.id 
+                        ? "bg-primary text-primary-foreground" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="p-4 border-t border-border">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium">{user?.email?.[0]?.toUpperCase()}</span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-foreground">{user?.email}</div>
+                  <div className="text-xs text-muted-foreground">Wealth Partner</div>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </aside>
+        </div>
+      )}
+    </>
   );
 
   const renderDashboard = () => (
@@ -866,8 +933,33 @@ const WealthPartnerDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {renderSidebar()}
-      <main className="ml-64 p-6">
-        {renderContent()}
+      
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border p-4 z-40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gradient-primary rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="font-bold text-foreground">Elevate</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center">
+              <span className="text-xs font-medium">{user?.email?.[0]?.toUpperCase()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="lg:ml-64 p-4 sm:p-6 pt-20 lg:pt-6">
+        <div className="max-w-7xl mx-auto">
+          {renderContent()}
+        </div>
       </main>
     </div>
   );
