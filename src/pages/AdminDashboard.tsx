@@ -42,6 +42,9 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserFilter, setSelectedUserFilter] = useState("all");
   const [selectedOpportunityFilter, setSelectedOpportunityFilter] = useState("all");
+  const [aiInsightQuery, setAiInsightQuery] = useState("");
+  const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
+  const [generatedInsight, setGeneratedInsight] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -156,11 +159,134 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleGenerateInsight = () => {
+  const generateMockInsight = (query: string) => {
+    const insights = {
+      "weekly activity": `**Weekly Activity Report (Aug 12-18, 2024)**
+
+📊 **Key Highlights:**
+• Total user activity increased by 23% compared to last week
+• 3 new investment opportunities were created
+• ₹2.3 Cr in new investments processed
+• 2 new investors onboarded by wealth partners
+
+📈 **Platform Growth:**
+• 5 new user registrations (Previous week: 3)
+• Active user engagement: 87% (up from 81%)
+• Investment completion rate: 94%
+
+🎯 **Top Performers:**
+• Sarah Parker: Onboarded 2 new investors, ₹1.8 Cr AUM
+• Michael Johnson: Created 2 new opportunities
+• Alex Mathew: Largest single investment of ₹25L`,
+
+      "users with over": `**High-Value Investors (>₹1M Investment)**
+
+💰 **Qualifying Investors:**
+
+1. **Alex Mathew** - ₹25,00,000 invested
+   - Partner: Sarah Parker
+   - Investment: Tata Motors Bond
+   - Status: Active, High engagement
+
+2. **Neha Sharma** - ₹12,00,000 invested  
+   - Partner: Sarah Parker
+   - Recent activity: Exploring new ICD opportunities
+   - Status: Active, Growing portfolio
+
+3. **Raj Patel** - ₹43,00,000 invested
+   - Partner: Sarah Parker  
+   - Status: Pending KYC completion
+   - Note: Highest investment amount on platform
+
+📊 **Analysis:**
+• 3 out of 6 investors (50%) have invested over ₹1M
+• Average investment: ₹26.67L among high-value investors
+• Total high-value AUM: ₹80L (77% of total platform AUM)`,
+
+      "pending investment": `**Pending Investment Opportunities**
+
+⏳ **Awaiting Approval:**
+
+1. **Reliance Retail Bond**
+   - Yield: 9.5% | Tenor: 3 years
+   - Min Investment: ₹15,00,000
+   - Submitted by: Sarah Parker
+   - Status: Under review for 3 days
+   - Note: High-yield opportunity in retail sector
+
+2. **L&T Finance ICD**  
+   - Yield: 8.7% | Tenor: 180 days
+   - Min Investment: ₹5,00,000
+   - Submitted by: Michael Johnson
+   - Status: Under review for 1 week
+   - Note: Short-term liquidity option
+
+📊 **Impact Analysis:**
+• Potential AUM increase: ₹20,00,000 if both approved
+• Expected investor interest: High (based on historical data)
+• Risk assessment: Both opportunities rated as low-medium risk`,
+
+      "default": `**AI-Generated Platform Insight**
+
+📊 **Current Platform Health: Excellent**
+
+**Key Metrics Analysis:**
+• User Growth: +15.6% month-over-month
+• AUM Growth: +19% year-over-year (₹5.2 Cr)
+• Platform Utilization: 94% active user rate
+
+**Strategic Recommendations:**
+1. **Scale Partnership Program**: Sarah Parker showing exceptional performance (₹3.7 Cr AUM)
+2. **Focus on ICD Products**: 35% higher interest in short-term instruments
+3. **Geographic Expansion**: Current user concentration suggests untapped markets
+
+**Risk Indicators:**
+• Low pending approvals (only 2) - efficient processing
+• High investment completion rate (94%)
+• All system health indicators operational
+
+**Next Quarter Forecast:**
+Based on current trends, expect:
+• 25-30% AUM growth
+• 8-12 new investment opportunities
+• 15-20 new user acquisitions`
+    };
+
+    // Determine which insight to return based on query
+    const lowerQuery = query.toLowerCase();
+    if (lowerQuery.includes("weekly") || lowerQuery.includes("activity")) {
+      return insights["weekly activity"];
+    } else if (lowerQuery.includes("users") || lowerQuery.includes("1m") || lowerQuery.includes("invested")) {
+      return insights["users with over"];
+    } else if (lowerQuery.includes("pending") || lowerQuery.includes("opportunity") || lowerQuery.includes("investment")) {
+      return insights["pending investment"];
+    } else {
+      return insights["default"];
+    }
+  };
+
+  const handleGenerateInsight = async (customQuery?: string) => {
+    const query = customQuery || aiInsightQuery || "general platform analysis";
+    
+    setIsGeneratingInsight(true);
+    setGeneratedInsight("");
+    
     toast({
       title: "Generating Insight",
-      description: "AI is analyzing the data. Results will be available shortly.",
+      description: "AI is analyzing the platform data...",
     });
+
+    // Simulate AI processing time
+    setTimeout(() => {
+      const insight = generateMockInsight(query);
+      setGeneratedInsight(insight);
+      setIsGeneratingInsight(false);
+      
+      toast({
+        title: "Insight Generated",
+        description: "AI analysis complete. View results below.",
+      });
+    }, 2000);
   };
 
   const handleExportData = () => {
@@ -216,13 +342,67 @@ const AdminDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Input placeholder="Ask a question or request an analysis..." />
+            <Input 
+              placeholder="Ask a question or request an analysis..." 
+              value={aiInsightQuery}
+              onChange={(e) => setAiInsightQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleGenerateInsight()}
+            />
             <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>Generate weekly activity report</Button>
-              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>List users with over ₹1M invested</Button>
-              <Button variant="outline" size="sm" onClick={() => handleGenerateInsight()}>Show all pending investment opportunities</Button>
-              <Button className="ml-auto" onClick={handleGenerateInsight}>Generate Insight</Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleGenerateInsight("Generate weekly activity report")}
+                disabled={isGeneratingInsight}
+              >
+                Generate weekly activity report
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleGenerateInsight("List users with over ₹1M invested")}
+                disabled={isGeneratingInsight}
+              >
+                List users with over ₹1M invested
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleGenerateInsight("Show all pending investment opportunities")}
+                disabled={isGeneratingInsight}
+              >
+                Show all pending investment opportunities
+              </Button>
+              <Button 
+                className="ml-auto" 
+                onClick={() => handleGenerateInsight()}
+                disabled={isGeneratingInsight}
+              >
+                {isGeneratingInsight ? "Generating..." : "Generate Insight"}
+              </Button>
             </div>
+            
+            {/* Generated Insight Display */}
+            {(generatedInsight || isGeneratingInsight) && (
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg border">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  <span className="font-medium">AI Analysis Result</span>
+                </div>
+                {isGeneratingInsight ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span>Analyzing platform data...</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-sm max-w-none">
+                    <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                      {generatedInsight}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
