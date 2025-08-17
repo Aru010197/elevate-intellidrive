@@ -140,7 +140,7 @@ const LandingPage = () => {
                     Performance analytics
                   </li>
                 </ul>
-                <Button variant="portal" className="w-full text-sm sm:text-base py-2 sm:py-3" onClick={() => navigate('/partner-dashboard')}>
+                <Button variant="portal" className="w-full text-sm sm:text-base py-2 sm:py-3" onClick={() => navigate('/auth?role=wealth-partner')}>
                   Access Partner Portal
                 </Button>
               </CardContent>

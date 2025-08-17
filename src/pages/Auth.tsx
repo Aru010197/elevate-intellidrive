@@ -10,9 +10,12 @@ import { AdminSignupForm } from "@/components/auth/AdminSignupForm";
 type UserRole = "investor" | "wealth-partner" | "admin";
 
 export default function Auth() {
-  const [selectedRole, setSelectedRole] = useState<UserRole>("investor");
-  const [isSignupMode, setIsSignupMode] = useState(false);
   const navigate = useNavigate();
+  const urlParams = new URLSearchParams(location.search);
+  const roleFromUrl = urlParams.get('role') as UserRole | null;
+  
+  const [selectedRole, setSelectedRole] = useState<UserRole>(roleFromUrl || "investor");
+  const [isSignupMode, setIsSignupMode] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-3 sm:p-4">
