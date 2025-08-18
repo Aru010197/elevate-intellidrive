@@ -36,7 +36,7 @@ export function AdminSignupForm() {
   const onSubmit = async (data: AdminSignupFormData) => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth`;
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,

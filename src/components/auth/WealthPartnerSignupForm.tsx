@@ -42,7 +42,7 @@ export function WealthPartnerSignupForm({ onSuccess }: WealthPartnerSignupFormPr
   const onSubmit = async (data: WealthPartnerSignupFormData) => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth`;
       
       const { error } = await supabase.auth.signUp({
         email: data.email,

@@ -41,7 +41,7 @@ export function InvestorSignupForm({ onSuccess }: InvestorSignupFormProps) {
   const onSubmit = async (data: InvestorSignupFormData) => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth`;
       
       const { error } = await supabase.auth.signUp({
         email: data.email,
