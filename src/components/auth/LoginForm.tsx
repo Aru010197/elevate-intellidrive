@@ -50,13 +50,44 @@ export function LoginForm({ role }: LoginFormProps) {
           title: "Login Failed",
           description: error.message,
         });
-      } else {
+        return;
+      }
+
+      // Fetch user profile to validate role
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError || !profile) {
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "Unable to verify user profile. Please try again.",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
+        // Validate that user's role matches the selected tab
+        if (profile.role !== role) {
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
+            description: `This account is not authorized for ${role === "wealth-partner" ? "Wealth Partner" : role.charAt(0).toUpperCase() + role.slice(1)} access. Please use the correct portal.`,
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully logged in.",
         });
         
-        // The AuthContext will handle the redirect automatically
         // Navigate to root and let Index component handle role-based routing
         navigate("/");
       }
@@ -66,6 +97,7 @@ export function LoginForm({ role }: LoginFormProps) {
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
       });
+      await supabase.auth.signOut();
     } finally {
       setIsLoading(false);
     }
