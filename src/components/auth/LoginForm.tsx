@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { GoogleAuthButton } from "./GoogleAuthButton";
+import { Separator } from "@/components/ui/separator";
 
 type UserRole = "investor" | "wealth-partner" | "admin";
 
@@ -104,53 +106,69 @@ export function LoginForm({ role }: LoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Enter your email"
-          {...register("email")}
-          className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
-        />
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
+    <div className="space-y-4">
+      {/* Google Sign In */}
+      <GoogleAuthButton role={role} mode="signin" />
+      
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <Separator className="w-full" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with email
+          </span>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Enter your password"
-          {...register("password")}
-          className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
-        />
-        {errors.password && (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        )}
-      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            {...register("email")}
+            className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
+          />
+          {errors.email && (
+            <p className="text-sm text-destructive">{errors.email.message}</p>
+          )}
+        </div>
 
-      <div className="text-right">
-        <button
-          type="button"
-          className="text-sm text-primary hover:text-primary-hover transition-colors"
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            {...register("password")}
+            className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
+          />
+          {errors.password && (
+            <p className="text-sm text-destructive">{errors.password.message}</p>
+          )}
+        </div>
+
+        <div className="text-right">
+          <button
+            type="button"
+            className="text-sm text-primary hover:text-primary-hover transition-colors"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        <Button
+          type="submit"
+          variant="portal"
+          className="w-full"
+          disabled={isLoading}
         >
-          Forgot password?
-        </button>
-      </div>
-
-      <Button
-        type="submit"
-        variant="portal"
-        className="w-full"
-        disabled={isLoading}
-      >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Sign In as {role === "wealth-partner" ? "Wealth Partner" : role.charAt(0).toUpperCase() + role.slice(1)}
-      </Button>
-    </form>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Sign In as {role === "wealth-partner" ? "Wealth Partner" : role.charAt(0).toUpperCase() + role.slice(1)}
+        </Button>
+      </form>
+    </div>
   );
 }
