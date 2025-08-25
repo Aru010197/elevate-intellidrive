@@ -22,85 +22,30 @@ serve(async (req) => {
     }
 
     if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY is missing');
       throw new Error('GEMINI_API_KEY is not configured');
     }
 
     console.log('Generating AI insight for query:', query);
-    console.log('Gemini API Key present:', !!geminiApiKey);
 
-    // Create a comprehensive system prompt for investment platform analysis
-    const systemPrompt = `You are an AI analyst for Elevate Wealth Investment Platform, a sophisticated investment management system. 
+    // Test response first to see if basic function works
+    const testInsight = `📊 **Test AI Insight for "${query}"**
 
-Platform Context:
-- Current AUM: ₹5.2 Cr with 19% YoY growth
-- Total Users: 41 (up from 32)
-- User Types: Investors, Wealth Partners, Admins
-- Investment Types: Bonds, ICDs (Inter-Corporate Deposits), REITs
-- Key Players: Sarah Parker (top wealth partner with ₹3.7 Cr AUM), Michael Johnson, Priya Sharma
+**Current Platform Overview:**
+- Total AUM: ₹5.2 Cr (19% YoY growth)  
+- Active Users: 41 investors
+- Top Performer: Sarah Parker (₹3.7 Cr AUM)
 
-Your role is to provide actionable, data-driven insights about:
-1. Platform performance and growth trends
-2. User behavior and engagement patterns  
-3. Investment opportunity analysis
-4. Risk assessment and recommendations
-5. Strategic growth recommendations
+**Key Recommendations:**
+🎯 Focus on expanding high-value client base
+📈 Leverage current growth momentum for new product launches
+⚠️ Monitor market volatility impacts on portfolio performance
 
-Format your responses with:
-- Clear headings with emoji indicators
-- Key metrics and percentages
-- Specific actionable recommendations
-- Risk indicators when relevant
-- Professional tone suitable for platform administrators
+*This is a test response while Gemini integration is being configured.*`;
 
-Always base insights on realistic investment platform scenarios and include specific numbers when possible.`;
+    console.log('Successfully generated test insight');
 
-    console.log('Making request to Gemini API...');
-    console.log('API URL:', `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey ? '[KEY_PRESENT]' : '[NO_KEY]'}`);
-    
-    const requestBody = {
-      contents: [{
-        parts: [{
-          text: `${systemPrompt}\n\nGenerate an insight report for: ${query}${platformData ? `\n\nAdditional Platform Data: ${JSON.stringify(platformData)}` : ''}`
-        }]
-      }],
-      generationConfig: {
-        maxOutputTokens: 800,
-        temperature: 0.7,
-      },
-    };
-    
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error response:', errorText);
-      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Gemini response data:', JSON.stringify(data, null, 2));
-    
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-      console.error('Invalid response structure:', data);
-      throw new Error('Invalid response format from Gemini API');
-    }
-    
-    const generatedInsight = data.candidates[0].content.parts[0].text;
-
-    console.log('Successfully generated AI insight');
-
-    return new Response(JSON.stringify({ insight: generatedInsight }), {
+    return new Response(JSON.stringify({ insight: testInsight }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
