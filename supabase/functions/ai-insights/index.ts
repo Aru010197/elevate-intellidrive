@@ -21,7 +21,12 @@ serve(async (req) => {
       throw new Error('Query is required');
     }
 
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
     console.log('Generating AI insight for query:', query);
+    console.log('Gemini API Key present:', !!geminiApiKey);
 
     // Create a comprehensive system prompt for investment platform analysis
     const systemPrompt = `You are an AI analyst for Elevate Wealth Investment Platform, a sophisticated investment management system. 
