@@ -54,34 +54,45 @@ Format your responses with:
 
 Always base insights on realistic investment platform scenarios and include specific numbers when possible.`;
 
+    console.log('Making request to Gemini API...');
+    console.log('API URL:', `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey ? '[KEY_PRESENT]' : '[NO_KEY]'}`);
+    
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: `${systemPrompt}\n\nGenerate an insight report for: ${query}${platformData ? `\n\nAdditional Platform Data: ${JSON.stringify(platformData)}` : ''}`
+        }]
+      }],
+      generationConfig: {
+        maxOutputTokens: 800,
+        temperature: 0.7,
+      },
+    };
+    
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${systemPrompt}\n\nGenerate an insight report for: ${query}${platformData ? `\n\nAdditional Platform Data: ${JSON.stringify(platformData)}` : ''}`
-          }]
-        }],
-        generationConfig: {
-          maxOutputTokens: 800,
-          temperature: 0.7,
-        },
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${errorText}`);
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini response:', data);
+    console.log('Gemini response data:', JSON.stringify(data, null, 2));
     
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('Invalid response structure:', data);
       throw new Error('Invalid response format from Gemini API');
     }
     
