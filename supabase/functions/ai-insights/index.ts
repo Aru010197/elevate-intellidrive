@@ -68,12 +68,18 @@ Always base insights on realistic investment platform scenarios and include spec
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Gemini API error:', error);
-      throw new Error(error.error?.message || 'Failed to generate insight');
+      const errorText = await response.text();
+      console.error('Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('Gemini response:', data);
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      throw new Error('Invalid response format from Gemini API');
+    }
+    
     const generatedInsight = data.candidates[0].content.parts[0].text;
 
     console.log('Successfully generated AI insight');
