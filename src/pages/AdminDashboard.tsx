@@ -279,17 +279,49 @@ Based on current trends, expect:
       description: "AI is analyzing the platform data...",
     });
 
-    // Simulate AI processing time
-    setTimeout(() => {
-      const insight = generateMockInsight(query);
-      setGeneratedInsight(insight);
-      setIsGeneratingInsight(false);
+    try {
+      // Prepare platform data for context
+      const platformData = {
+        metrics: platformMetrics,
+        users: users.length,
+        investments: investments.length,
+        pendingApprovals: pendingApprovals.length,
+        recentActivities: recentActivities.slice(0, 3),
+        activeOpportunities: investments.filter(inv => inv.status === 'Active').length,
+      };
+
+      const response = await supabase.functions.invoke('ai-insights', {
+        body: { 
+          query,
+          platformData 
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      setGeneratedInsight(response.data.insight);
       
       toast({
         title: "Insight Generated",
         description: "AI analysis complete. View results below.",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Error generating insight:', error);
+      
+      // Fallback to mock insight if API fails
+      const fallbackInsight = generateMockInsight(query);
+      setGeneratedInsight(fallbackInsight);
+      
+      toast({
+        variant: "destructive",
+        title: "Using Offline Mode",
+        description: "AI service unavailable, showing cached analysis.",
+      });
+    } finally {
+      setIsGeneratingInsight(false);
+    }
   };
 
   const handleExportData = () => {
