@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,31 +49,32 @@ Format your responses with:
 
 Always base insights on realistic investment platform scenarios and include specific numbers when possible.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate an insight report for: ${query}${platformData ? `\n\nAdditional Platform Data: ${JSON.stringify(platformData)}` : ''}` }
-        ],
-        max_completion_tokens: 800,
-        temperature: 0.7,
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nGenerate an insight report for: ${query}${platformData ? `\n\nAdditional Platform Data: ${JSON.stringify(platformData)}` : ''}`
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 800,
+          temperature: 0.7,
+        },
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('OpenAI API error:', error);
+      console.error('Gemini API error:', error);
       throw new Error(error.error?.message || 'Failed to generate insight');
     }
 
     const data = await response.json();
-    const generatedInsight = data.choices[0].message.content;
+    const generatedInsight = data.candidates[0].content.parts[0].text;
 
     console.log('Successfully generated AI insight');
 
